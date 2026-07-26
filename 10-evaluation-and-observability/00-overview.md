@@ -1,0 +1,26 @@
+# Phase 10 — Evaluation and Observability
+
+## Why this phase exists
+
+Phase 00 established the foundational fact this entire handbook has built on: an LLM-backed system is probabilistic, not deterministic, and "it worked when I tried it" is much weaker evidence of correctness here than it would be for an ordinary deterministic service. Every phase since then has built real capability — retrieval, memory, tools, structured output, reasoning loops, multi-agent orchestration — and every one of those capabilities inherited that same foundational uncertainty. This phase is where you finally build the discipline that Phase 00 implied was necessary from the very beginning: a systematic way to know whether any of it is actually working, whether a change made things better or worse, and what happened, in detail, after the fact when something goes wrong.
+
+It's worth being direct about why this phase exists as its own dedicated phase rather than being folded into Phase 11's production deployment concerns, which is how a lot of AI-engineering material treats it. Evaluation and observability are not deployment concerns bolted onto a finished system — they are the only mechanism by which "finished" can mean anything at all for a probabilistic system. A deterministic service that passes its test suite once will pass it again, given the same input; you already know this, and it shapes how much confidence you place in a single green test run. An agent that succeeds on a demo run has told you almost nothing about how it behaves on the next hundred runs, because Phase 00's core fact — same input, potentially different output — never went away just because you stopped thinking about it after Phase 07. You cannot debug (this handbook's stated goal for you), evaluate, or maintain a production-grade agent system without the tools this phase builds, and treating them as optional, deployment-time polish is precisely the gap between a demo and a system a team can actually trust and operate.
+
+This phase also directly answers a question every previous phase has quietly deferred: Phase 03's retrieval evaluation (precision/recall against a golden set) and Phase 06's structured-output validation were both, in their own narrow scopes, already evaluation. This phase generalizes that same discipline — measure against ground truth, build a repeatable regression check, don't rely on spot-checking — to the harder case of an entire agent's or multi-agent system's *behavior*, where "ground truth" is less crisp than a retrieval precision score or a JSON schema, and where a single run's trace spans many reasoning steps, tool calls, and possibly multiple agents (Phase 09), any of which could be where something went wrong.
+
+## What this phase covers
+
+1. **`01-tracing-llm-calls-with-opentelemetry.md`** — capturing a complete, structured record of every call, tool execution, and decision point in an agent's run, using standard distributed-tracing infrastructure you likely already operate for other services.
+2. **`02-logging-prompts-and-responses-safely.md`** — what to actually log for debugging value, and the specific data-handling discipline needed when your logs now potentially contain PII, secrets, or sensitive business data flowing through prompts and responses.
+3. **`03-llm-as-judge-evaluation.md`** — using a second model call to score or judge an agent's output at scale, a technique previewed but deliberately deferred in Phase 03, covered here with its real biases and failure modes made explicit.
+4. **`04-regression-testing-for-agent-behavior.md`** — building a repeatable test suite for behavior that isn't deterministic, adapting your existing testing instincts to a system where "the exact same test passing twice" doesn't mean what it used to.
+5. **`05-cost-and-latency-dashboards.md`** — turning Phase 01's per-call cost mechanics and Phase 07's budget enforcement into aggregate, ongoing operational visibility rather than per-run bookkeeping.
+6. **`06-project-agent-eval-harness.md`** — a complete evaluation harness applied to the Phase 09 multi-agent research pipeline, combining tracing, LLM-as-judge scoring, and regression testing into one working system.
+
+## Prerequisites
+
+Phase 03 (the precision/recall evaluation discipline this phase generalizes), Phase 06 (the validation discipline this phase's regression testing extends to full agent behavior), Phase 07 (the agent loop whose every decision point needs tracing), and Phase 09 (multi-agent systems, whose cross-agent handoffs are exactly where tracing earns its keep most).
+
+## What you gain from this phase
+
+The ability to answer, with actual evidence rather than impression, the questions this handbook's introduction named as core goals: can you debug this agent, can you evaluate whether it's working, can you maintain it responsibly over time as the underlying model, prompts, or tools change. Without this phase, every one of Phases 07 through 09's systems remains fundamentally unaccountable — impressive when it works, and undiagnosable when it doesn't. This phase is what turns "I built an agent" into "I can tell you, with evidence, how well it works and what to do when it stops."
